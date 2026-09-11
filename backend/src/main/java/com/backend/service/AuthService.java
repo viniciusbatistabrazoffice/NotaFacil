@@ -4,6 +4,6 @@ import com.backend.entity.Auth;
 
 public interface AuthService {
     void login(Auth auth);
-    void logout();
+    void logout(Auth auth);
     void remember();
 }
