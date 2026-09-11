@@ -7,6 +7,9 @@ import RegisterPage from '../pages/auth/RegisterPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import DashboardPage from '../pages/dashboard/DashboardPage';
+import NotasPage from '../pages/notas/NotasPage';
+import RelatoriosPage from '../pages/relatorios/RelatoriosPage';
+import ConfiguracoesPage from '../pages/configuracoes/ConfiguracoesPage';
 
 export default function AppRoutes() {
   return (
@@ -21,6 +24,9 @@ export default function AppRoutes() {
       <Route element={<PrivateRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/notas" element={<NotasPage />} />
+          <Route path="/relatorios" element={<RelatoriosPage />} />
+          <Route path="/configuracoes" element={<ConfiguracoesPage />} />
         </Route>
       </Route>
 

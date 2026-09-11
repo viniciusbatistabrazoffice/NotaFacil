@@ -4,20 +4,113 @@
 }
 
 .sidebar {
-  width: 240px;
+  width: 280px;
   flex-shrink: 0;
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
-  padding: 24px 16px;
+  background: #0b1120;
+  border-right: 1px solid #1e293b;
+  padding: 28px 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
+}
+
+.brandBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .brand {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+}
+
+.brandTag {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: #111827;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius);
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.profileName {
+  color: #f1f5f9;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profileEmail {
+  color: #64748b;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profileStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #34d399;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 2px #111827;
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.navTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-left: 14px;
 }
 
 .nav {
@@ -27,21 +120,86 @@
 }
 
 .link {
-  padding: 10px 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
   border-radius: var(--radius);
-  color: var(--color-text-muted);
+  color: #94a3b8;
   text-decoration: none;
   font-weight: 500;
+  font-size: 0.95rem;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  border-radius: 0 4px 4px 0;
+  background: #60a5fa;
+  transform: translateY(-50%);
+  transition: height 0.25s ease;
 }
 
 .link:hover {
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: #1e293b;
+  color: #e2e8f0;
 }
 
 .link.active {
-  background: rgba(37, 99, 235, 0.1);
-  color: var(--color-primary);
+  background: #1e293b;
+  color: #60a5fa;
+}
+
+.link.active::before {
+  height: 20px;
+}
+
+.link svg {
+  flex-shrink: 0;
+}
+
+.sidebarFooter {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #1e293b;
+}
+
+.logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid #1e293b;
+  background: transparent;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #94a3b8;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.logout:hover {
+  color: #f87171;
+  border-color: #f87171;
+  background: #1e293b;
+}
+
+.version {
+  text-align: center;
+  color: #475569;
+  font-size: 0.75rem;
 }
 
 .main {
@@ -66,22 +224,9 @@
   font-size: 0.9rem;
 }
 
-.logout {
-  border: 1px solid var(--color-border);
-  background: transparent;
-  border-radius: var(--radius);
-  padding: 6px 14px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  color: var(--color-text-muted);
-}
-
-.logout:hover {
-  color: var(--color-danger);
-  border-color: var(--color-danger);
-}
-
 .content {
   flex: 1;
   padding: 24px;
+  overflow-y: auto;
+  background: var(--color-surface);
 }
