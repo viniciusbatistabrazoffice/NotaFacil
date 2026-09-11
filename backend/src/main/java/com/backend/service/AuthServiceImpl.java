@@ -1,9 +1,18 @@
 package com.backend.service;
 
+import com.backend.entity.Auth;
+
 public class AuthServiceImpl implements AuthService {
+
+    private final AuthRepository authRepository;
+
+    public AuthServiceImpl(AuthRepository authRepository) {
+        this.authRepository = authRepository;
+    }
     @Override
-    public void login(String username, String password, String email) {
+    public void login(Auth auth) {
         // Implement login logic here
+    
     }
 
     @Override

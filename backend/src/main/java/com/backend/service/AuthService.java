@@ -1,7 +1,9 @@
 package com.backend.service;
 
+import com.backend.entity.Auth;
+
 public interface AuthService {
-    void login(String username, String password, String email);
+    void login(Auth auth);
     void logout();
     void remember();
 }
