@@ -1,15 +1,27 @@
 package com.backend.entity;
 
+import java.time.Instant;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity 
+@Entity
 @Table(name = "auth")
 public class Auth {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
     private String password;
     private String email;
+    private String resetToken;
+    private Instant resetTokenExpiresAt;
+
+    protected Auth() {
+    }
 
     public Auth(Long id, String username, String password, String email) {
         this.id = id;
@@ -49,5 +61,21 @@ public class Auth {
     public void setEmail(String email) {
         this.email = email;
     }
-    
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public Instant getResetTokenExpiresAt() {
+        return resetTokenExpiresAt;
+    }
+
+    public void setResetTokenExpiresAt(Instant resetTokenExpiresAt) {
+        this.resetTokenExpiresAt = resetTokenExpiresAt;
+    }
+
 }
