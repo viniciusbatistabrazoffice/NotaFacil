@@ -1,15 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#0b1120" />
     <meta
       name="description"
-      content="Web site created using create-react-app"
+      content="NotaFácil — Gestão de notas fiscais para confecção"
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <style>
+      #splash {
+        position: fixed;
+        inset: 0;
+        background: #0b1120;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        z-index: 9999;
+      }
+      #splash .splash-brand {
+        color: #f8fafc;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      #splash .splash-tag {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+      #splash .splash-spinner {
+        width: 36px;
+        height: 36px;
+        margin-top: 10px;
+        border-radius: 50%;
+        border: 3px solid #1e293b;
+        border-top-color: #2563eb;
+        animation: splash-spin 0.8s linear infinite;
+      }
+      @keyframes splash-spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -24,11 +61,17 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>NotaFácil</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <div id="splash">
+        <span class="splash-brand">NotaFácil</span>
+        <span class="splash-tag">Gestão para confecção</span>
+        <span class="splash-spinner"></span>
+      </div>
+    </div>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

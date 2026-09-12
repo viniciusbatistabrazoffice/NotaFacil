@@ -32,7 +32,7 @@ http.interceptors.response.use(
 
     if (response?.status === 401 && requestConfig?.auth !== false) {
       authStorage.clear();
-      window.location.assign('/login');
+      window.location.assign('/#/login');
       return Promise.reject(new ApiError(401, 'Sessão expirada. Faça login novamente.'));
     }
 

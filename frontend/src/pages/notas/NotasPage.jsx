@@ -1,19 +1,21 @@
 import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { notes, statusOptions } from '../../data/notes';
 import styles from './NotasPage.module.css';
 
-const notes = [
-  { id: 1, number: '0001', client: 'Cliente A', value: 'R$ 1.200,00', status: 'Emitida' },
-  { id: 2, number: '0002', client: 'Cliente B', value: 'R$ 850,00', status: 'Pendente' },
-  { id: 3, number: '0003', client: 'Cliente C', value: 'R$ 2.400,00', status: 'Cancelada' },
-];
-
 export default function NotasPage() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = useState('');
+
+  const statusFilter = searchParams.get('status');
+  const statusLabel = statusOptions.find((s) => s.param === statusFilter)?.label;
 
   const filteredNotes = notes.filter(
     (note) =>
-      note.client.toLowerCase().includes(filter.toLowerCase()) ||
-      note.number.includes(filter)
+      (note.client.toLowerCase().includes(filter.toLowerCase()) ||
+        note.number.includes(filter)) &&
+      (!statusFilter || note.status.toLowerCase() === statusFilter)
   );
 
   return (
@@ -23,7 +25,7 @@ export default function NotasPage() {
           <h2>Notas fiscais</h2>
           <p>Gerencie as notas fiscais emitidas.</p>
         </div>
-        <button type="button" className={styles.primaryButton}>
+        <button type="button" className={styles.primaryButton} onClick={() => navigate('/emitir')}>
           Emitir nota
         </button>
       </header>
@@ -35,6 +37,17 @@ export default function NotasPage() {
         onChange={(e) => setFilter(e.target.value)}
         className={styles.search}
       />
+
+      {statusLabel && (
+        <div className={styles.activeFilter}>
+          <span>
+            Status: <strong>{statusLabel}</strong>
+          </span>
+          <button type="button" onClick={() => setSearchParams({})} aria-label="Limpar filtro">
+            &times;
+          </button>
+        </div>
+      )}
 
       <table className={styles.table}>
         <thead>
