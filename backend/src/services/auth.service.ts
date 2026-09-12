@@ -1,0 +1,175 @@
+import bcrypt from 'bcryptjs';
+import { createHash, randomBytes } from 'crypto';
+import { User } from '../entities/tenant/User';
+import { Tenant } from '../entities/public/Tenant';
+import { getUserRepository } from '../repositories/user.repository';
+import { TenantService } from './tenant.service';
+import { signToken } from '../utils/jwt';
+import { sendPasswordResetEmail } from '../utils/mailer';
+import { env } from '../config/env';
+import { MessageResponse } from '../dto/message-response.dto';
+
+interface RegisterInput {
+  companyName: string;
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface LoginInput {
+  tenant: string;
+  email: string;
+  password: string;
+}
+
+interface AuthResult {
+  user: Omit<User, 'password'>;
+  tenant: Pick<Tenant, 'id' | 'name' | 'slug'>;
+  token: string;
+}
+
+interface ForgotPasswordResult extends MessageResponse {
+  resetToken?: string;
+  resetUrl?: string;
+}
+
+const SALT_ROUNDS = 10;
+const RESET_TOKEN_EXPIRES_MS = 60 * 60 * 1000;
+const FORGOT_PASSWORD_MESSAGE = 'If the email exists, a reset link has been sent';
+
+const tenantService = new TenantService();
+
+export class AuthService {
+  async register(data: RegisterInput): Promise<AuthResult> {
+    if (!data.companyName || !data.name || !data.email || !data.password) {
+      throw new Error('Company name, name, email and password are required');
+    }
+
+    const tenant = await tenantService.create(data.companyName);
+
+    try {
+      const userRepository = await getUserRepository(tenant.schemaName);
+      const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+      const user = userRepository.create({
+        name: data.name,
+        email: data.email,
+        password: hashedPassword,
+      });
+      const saved = await userRepository.save(user);
+
+      const { password: _password, ...userWithoutPassword } = saved;
+      return {
+        user: userWithoutPassword,
+        tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug },
+        token: signToken({ sub: saved.id, tenantId: tenant.id, schema: tenant.schemaName }),
+      };
+    } catch (error) {
+      await tenantService.destroy(tenant);
+      throw error;
+    }
+  }
+
+  async login(data: LoginInput): Promise<AuthResult> {
+    if (!data.tenant || !data.email || !data.password) {
+      throw new Error('Tenant, email and password are required');
+    }
+
+    const tenant = await tenantService.findBySlug(data.tenant);
+    if (!tenant) {
+      throw new Error('Invalid credentials');
+    }
+
+    const userRepository = await getUserRepository(tenant.schemaName);
+    const user = await userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email: data.email })
+      .getOne();
+
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+
+    const isValidPassword = await bcrypt.compare(data.password, user.password);
+    if (!isValidPassword) {
+      throw new Error('Invalid credentials');
+    }
+
+    const { password: _password, ...userWithoutPassword } = user;
+    return {
+      user: userWithoutPassword,
+      tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug },
+      token: signToken({ sub: user.id, tenantId: tenant.id, schema: tenant.schemaName }),
+    };
+  }
+
+  async forgotPassword(tenantSlug: string, email: string): Promise<ForgotPasswordResult> {
+    if (!tenantSlug) {
+      throw new Error('Tenant is required');
+    }
+    if (!email) {
+      throw new Error('Email is required');
+    }
+
+    const tenant = await tenantService.findBySlug(tenantSlug);
+    if (!tenant) {
+      return { message: FORGOT_PASSWORD_MESSAGE };
+    }
+
+    const userRepository = await getUserRepository(tenant.schemaName);
+    const user = await userRepository.findOneBy({ email });
+    if (!user) {
+      return { message: FORGOT_PASSWORD_MESSAGE };
+    }
+
+    const token = randomBytes(32).toString('hex');
+    user.resetToken = createHash('sha256').update(token).digest('hex');
+    user.resetTokenExpires = new Date(Date.now() + RESET_TOKEN_EXPIRES_MS);
+    await userRepository.save(user);
+
+    const resetUrl = `${env.frontendUrl}/reset-password?token=${token}&tenant=${tenant.slug}`;
+    await sendPasswordResetEmail(user.email, resetUrl);
+
+    const result: ForgotPasswordResult = { message: FORGOT_PASSWORD_MESSAGE };
+    if (env.nodeEnv === 'development') {
+      result.resetToken = token;
+      result.resetUrl = resetUrl;
+    }
+    return result;
+  }
+
+  async resetPassword(
+    tenantSlug: string,
+    token: string,
+    password: string,
+  ): Promise<MessageResponse> {
+    if (!tenantSlug || !token || !password) {
+      throw new Error('Tenant, token and password are required');
+    }
+
+    const tenant = await tenantService.findBySlug(tenantSlug);
+    if (!tenant) {
+      throw new Error('Invalid or expired reset token');
+    }
+
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+    const userRepository = await getUserRepository(tenant.schemaName);
+    const user = await userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.resetToken')
+      .addSelect('user.resetTokenExpires')
+      .where('user.resetToken = :hashedToken', { hashedToken })
+      .getOne();
+
+    if (!user || !user.resetTokenExpires || user.resetTokenExpires.getTime() < Date.now()) {
+      throw new Error('Invalid or expired reset token');
+    }
+
+    user.password = await bcrypt.hash(password, SALT_ROUNDS);
+    user.resetToken = null;
+    user.resetTokenExpires = null;
+    await userRepository.save(user);
+
+    return { message: 'Password updated successfully' };
+  }
+}
