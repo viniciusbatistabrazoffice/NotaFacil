@@ -7,6 +7,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { OrdersPage } from './pages/OrdersPage';
+import { OrderDetailsPage } from './pages/OrderDetailsPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import './App.css';
 
@@ -27,10 +29,8 @@ function App() {
             }
           >
             <Route path="/" element={<DashboardPage />} />
-            <Route
-              path="/pedidos"
-              element={<ComingSoonPage title="Pedidos" />}
-            />
+            <Route path="/pedidos" element={<OrdersPage />} />
+            <Route path="/pedidos/:id" element={<OrderDetailsPage />} />
             <Route
               path="/notas-fiscais"
               element={<ComingSoonPage title="Notas Fiscais" />}
