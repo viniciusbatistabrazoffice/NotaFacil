@@ -1,53 +1,73 @@
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Icon } from './Icon';
 
 const NAV_SECTIONS = [
   {
-    title: 'Menu',
+    title: 'Operações',
     items: [
       { to: '/', end: true, icon: 'dashboard', label: 'Dashboard' },
+      { to: '/pedidos', icon: 'orders', label: 'Pedidos' },
       { to: '/notas-fiscais', icon: 'invoice', label: 'Notas Fiscais' },
-      { to: '/clientes', icon: 'clients', label: 'Clientes' },
-      { to: '/produtos', icon: 'products', label: 'Produtos' },
-      { to: '/relatorios', icon: 'reports', label: 'Relatórios' },
+      { to: '/producao', icon: 'scissors', label: 'Produção' },
     ],
   },
   {
-    title: 'Sistema',
+    title: 'Cadastros',
     items: [
+      { to: '/clientes', icon: 'clients', label: 'Clientes' },
+      { to: '/produtos', icon: 'products', label: 'Modelos e Produtos' },
+      { to: '/insumos', icon: 'materials', label: 'Tecidos e Insumos' },
+      { to: '/fornecedores', icon: 'suppliers', label: 'Fornecedores' },
+    ],
+  },
+  {
+    title: 'Gestão',
+    items: [
+      { to: '/financeiro', icon: 'financial', label: 'Financeiro' },
+      { to: '/relatorios', icon: 'reports', label: 'Relatórios' },
       { to: '/configuracoes', icon: 'settings', label: 'Configurações' },
       { to: '/ajuda', icon: 'help', label: 'Ajuda' },
     ],
   },
 ];
 
-function SidebarBrand({ collapsed, onToggle }) {
+const NAV_ITEMS = NAV_SECTIONS.flatMap((section) => section.items);
+
+const EXTRA_TITLES = { '/perfil': 'Meu Perfil' };
+
+function getPageTitle(pathname) {
+  const item = NAV_ITEMS.find((nav) =>
+    nav.end ? pathname === nav.to : pathname.startsWith(nav.to)
+  );
+  return item?.label ?? EXTRA_TITLES[pathname] ?? 'NotaFácil';
+}
+
+function getInitials(name) {
+  return (name ?? '?')
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
+function SidebarBrand() {
   const { tenant } = useAuth();
 
   return (
     <div className="sidebar-brand">
       <span className="sidebar-logo">
-        <Icon name="logo" size={18} />
+        <Icon name="scissors" size={18} />
       </span>
       <div className="sidebar-brand-text">
         <span className="sidebar-brand-name">NotaFácil</span>
-        {tenant?.name && (
-          <span className="sidebar-brand-tenant">{tenant.name}</span>
-        )}
+        <span className="sidebar-brand-tenant">
+          {tenant?.name ?? 'Gestão de Confecção'}
+        </span>
       </div>
-      {onToggle && (
-        <button
-          type="button"
-          className="sidebar-collapse-btn"
-          onClick={onToggle}
-          title={collapsed ? 'Expandir menu' : 'Recolher menu'}
-          aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
-        >
-          <Icon name={collapsed ? 'expand' : 'collapse'} />
-        </button>
-      )}
     </div>
   );
 }
@@ -81,35 +101,139 @@ function SidebarNav() {
   );
 }
 
-function SidebarUser() {
-  const { user, logout } = useAuth();
-  const initials = (user?.name ?? '?')
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
+function Topbar({ onToggleSidebar }) {
+  const { user, tenant, logout } = useAuth();
+  const location = useLocation();
+  const pageTitle = getPageTitle(location.pathname);
 
   return (
-    <div className="sidebar-user">
-      <span className="sidebar-avatar">{initials}</span>
-      <div className="sidebar-user-info">
-        <span className="sidebar-user-name">{user?.name}</span>
-        {user?.email && (
-          <span className="sidebar-user-email">{user.email}</span>
-        )}
+    <nav className="topbar navbar sticky-top" data-bs-theme="dark">
+      <div className="container-fluid">
+        <div className="topbar-zone">
+          <button
+            type="button"
+            className="topbar-toggler d-lg-none"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#appSidebar"
+            aria-controls="appSidebar"
+            aria-label="Abrir menu"
+          >
+            <Icon name="menu" size={20} />
+          </button>
+          <button
+            type="button"
+            className="topbar-toggler d-none d-lg-inline-flex"
+            onClick={onToggleSidebar}
+            aria-label="Alternar menu"
+          >
+            <Icon name="menu" size={20} />
+          </button>
+
+          <nav className="topbar-breadcrumb" aria-label="breadcrumb">
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <Link to="/">Início</Link>
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">
+                {pageTitle}
+              </li>
+            </ol>
+          </nav>
+        </div>
+
+        <div className="topbar-search d-none d-md-flex">
+          <Icon name="search" />
+          <input type="search" placeholder="Buscar..." aria-label="Buscar" />
+        </div>
+
+        <div className="topbar-zone topbar-zone-end gap-1">
+          <div className="dropdown">
+            <button
+              type="button"
+              className="topbar-icon-btn"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              aria-label="Notificações"
+            >
+              <Icon name="bell" size={18} />
+              <span className="topbar-dot" />
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end topbar-notifications">
+              <li>
+                <h6 className="dropdown-header">Notificações</h6>
+              </li>
+              <li>
+                <span className="dropdown-item-text topbar-notifications-empty">
+                  Nenhuma notificação no momento.
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <span className="topbar-divider d-none d-md-block" />
+
+          <div className="dropdown">
+            <button
+              type="button"
+              className="topbar-user dropdown-toggle"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <span className="sidebar-avatar">{getInitials(user?.name)}</span>
+              <span className="topbar-user-text d-none d-sm-flex">
+                <span className="topbar-user-name">{user?.name}</span>
+                <span className="topbar-user-tenant">{tenant?.name}</span>
+              </span>
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end topbar-user-menu">
+              <li className="topbar-user-header">
+                <span className="sidebar-avatar">
+                  {getInitials(user?.name)}
+                </span>
+                <div className="topbar-user-header-text">
+                  <span>{user?.name}</span>
+                  <span className="text-muted">{user?.email}</span>
+                </div>
+              </li>
+              <li>
+                <hr className="dropdown-divider" />
+              </li>
+              <li>
+                <Link
+                  to="/perfil"
+                  className="dropdown-item d-flex align-items-center gap-2"
+                >
+                  <Icon name="person" />
+                  Meu perfil
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/configuracoes"
+                  className="dropdown-item d-flex align-items-center gap-2"
+                >
+                  <Icon name="settings" />
+                  Configurações
+                </Link>
+              </li>
+              <li>
+                <hr className="dropdown-divider" />
+              </li>
+              <li>
+                <button
+                  type="button"
+                  className="dropdown-item d-flex align-items-center gap-2 text-danger"
+                  onClick={logout}
+                >
+                  <Icon name="logout" />
+                  Sair
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <button
-        type="button"
-        className="sidebar-logout"
-        onClick={logout}
-        title="Sair"
-        aria-label="Sair"
-      >
-        <Icon name="logout" />
-      </button>
-    </div>
+    </nav>
   );
 }
 
@@ -123,35 +247,13 @@ export function AppLayout() {
           collapsed ? ' collapsed' : ''
         }`}
       >
-        <SidebarBrand
-          collapsed={collapsed}
-          onToggle={() => setCollapsed((value) => !value)}
-        />
+        <SidebarBrand />
         <SidebarNav />
-        <SidebarUser />
+        <div className="sidebar-footer-version">NotaFácil v1.0</div>
       </aside>
 
       <div className="app-main">
-        <nav className="navbar navbar-dark bg-dark d-lg-none sticky-top">
-          <div className="container-fluid">
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#appSidebar"
-              aria-controls="appSidebar"
-              aria-label="Abrir menu"
-            >
-              <span className="navbar-toggler-icon" />
-            </button>
-            <span className="navbar-brand mb-0 d-flex align-items-center gap-2">
-              <span className="sidebar-logo sidebar-logo-sm">
-                <Icon name="logo" size={14} />
-              </span>
-              NotaFácil
-            </span>
-          </div>
-        </nav>
+        <Topbar onToggleSidebar={() => setCollapsed((value) => !value)} />
 
         <main className="app-content">
           <Outlet />
@@ -170,7 +272,7 @@ export function AppLayout() {
             id="appSidebarLabel"
           >
             <span className="sidebar-logo sidebar-logo-sm">
-              <Icon name="logo" size={14} />
+              <Icon name="scissors" size={14} />
             </span>
             NotaFácil
           </span>
@@ -183,7 +285,6 @@ export function AppLayout() {
         </div>
         <div className="offcanvas-body d-flex flex-column p-3">
           <SidebarNav />
-          <SidebarUser />
         </div>
       </div>
     </div>

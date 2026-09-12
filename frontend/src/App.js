@@ -28,8 +28,16 @@ function App() {
           >
             <Route path="/" element={<DashboardPage />} />
             <Route
+              path="/pedidos"
+              element={<ComingSoonPage title="Pedidos" />}
+            />
+            <Route
               path="/notas-fiscais"
               element={<ComingSoonPage title="Notas Fiscais" />}
+            />
+            <Route
+              path="/producao"
+              element={<ComingSoonPage title="Produção" />}
             />
             <Route
               path="/clientes"
@@ -37,11 +45,27 @@ function App() {
             />
             <Route
               path="/produtos"
-              element={<ComingSoonPage title="Produtos" />}
+              element={<ComingSoonPage title="Modelos e Produtos" />}
+            />
+            <Route
+              path="/insumos"
+              element={<ComingSoonPage title="Tecidos e Insumos" />}
+            />
+            <Route
+              path="/fornecedores"
+              element={<ComingSoonPage title="Fornecedores" />}
+            />
+            <Route
+              path="/financeiro"
+              element={<ComingSoonPage title="Financeiro" />}
             />
             <Route
               path="/relatorios"
               element={<ComingSoonPage title="Relatórios" />}
+            />
+            <Route
+              path="/perfil"
+              element={<ComingSoonPage title="Meu Perfil" />}
             />
             <Route
               path="/configuracoes"
