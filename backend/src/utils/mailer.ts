@@ -1,4 +1,4 @@
-import Mailjet, { SendEmailV3_1 } from 'node-mailjet';
+import Mailjet, { type SendEmailV3_1 } from 'node-mailjet';
 import { env } from '../config/env';
 
 const mailjet =
@@ -19,7 +19,7 @@ async function sendEmail(message: SendEmailV3_1.Message): Promise<void> {
   const result = await mailjet.post('send', { version: 'v3.1' }).request<SendEmailV3_1.Response>(body);
   const response = result.body.Messages?.[0];
 
-  if (response?.Status !== SendEmailV3_1.ResponseStatus.Success) {
+  if (response?.Status !== 'success') {
     throw new Error(`Mailjet send failed: ${JSON.stringify(response?.Errors ?? result.body)}`);
   }
 }

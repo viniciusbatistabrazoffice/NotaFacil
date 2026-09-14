@@ -10,7 +10,10 @@ export class UserController {
   }
 
   async findById(req: Request, res: Response): Promise<Response> {
-    const user = await userService.findById(req.tenantSchema as string, req.params.id as string);
+    const user = await userService.findPublicById(
+      req.tenantSchema as string,
+      req.params.id as string,
+    );
     return res.json(user);
   }
 
@@ -29,7 +32,11 @@ export class UserController {
   }
 
   async delete(req: Request, res: Response): Promise<Response> {
-    await userService.delete(req.tenantSchema as string, req.params.id as string);
+    await userService.delete(
+      req.tenantSchema as string,
+      req.params.id as string,
+      req.userId as string,
+    );
     return res.status(204).send();
   }
 }

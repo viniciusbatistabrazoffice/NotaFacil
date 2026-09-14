@@ -6,7 +6,11 @@ import { slugify, toSchemaName } from '../utils/slug';
 
 export class TenantService {
   async findBySlug(slug: string): Promise<Tenant | null> {
-    return tenantRepository.findOneBy({ slug });
+    const normalized = slugify(slug);
+    if (!normalized) {
+      return null;
+    }
+    return tenantRepository.findOneBy({ slug: normalized });
   }
 
   async create(name: string): Promise<Tenant> {

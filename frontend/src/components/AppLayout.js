@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getInitials } from '../utils/users';
 import { Icon } from './Icon';
+import { Logo } from './Logo';
 
 const NAV_SECTIONS = [
   {
@@ -11,6 +13,7 @@ const NAV_SECTIONS = [
       { to: '/pedidos', icon: 'orders', label: 'Pedidos' },
       { to: '/notas-fiscais', icon: 'invoice', label: 'Notas Fiscais' },
       { to: '/producao', icon: 'scissors', label: 'Produção' },
+      { to: '/pdv', icon: 'shopping-cart', label: 'PDV' },
     ],
   },
   {
@@ -27,8 +30,8 @@ const NAV_SECTIONS = [
     items: [
       { to: '/financeiro', icon: 'financial', label: 'Financeiro' },
       { to: '/relatorios', icon: 'reports', label: 'Relatórios' },
+      { to: '/usuarios', icon: 'users', label: 'Usuários' },
       { to: '/configuracoes', icon: 'settings', label: 'Configurações' },
-      { to: '/ajuda', icon: 'help', label: 'Ajuda' },
     ],
   },
 ];
@@ -44,24 +47,12 @@ function getPageTitle(pathname) {
   return item?.label ?? EXTRA_TITLES[pathname] ?? 'NotaFácil';
 }
 
-function getInitials(name) {
-  return (name ?? '?')
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
-
 function SidebarBrand() {
   const { tenant } = useAuth();
 
   return (
     <div className="sidebar-brand">
-      <span className="sidebar-logo">
-        <Icon name="scissors" size={18} />
-      </span>
+      <Logo size={36} className="sidebar-logo" />
       <div className="sidebar-brand-text">
         <span className="sidebar-brand-name">NotaFácil</span>
         <span className="sidebar-brand-tenant">
@@ -98,6 +89,16 @@ function SidebarNav() {
         </div>
       ))}
     </nav>
+  );
+}
+
+function SidebarContent({ showBrand = false, showVersion = false }) {
+  return (
+    <>
+      {showBrand && <SidebarBrand />}
+      <SidebarNav />
+      {showVersion && <div className="sidebar-footer-version">NotaFácil v1.0</div>}
+    </>
   );
 }
 
@@ -247,9 +248,7 @@ export function AppLayout() {
           collapsed ? ' collapsed' : ''
         }`}
       >
-        <SidebarBrand />
-        <SidebarNav />
-        <div className="sidebar-footer-version">NotaFácil v1.0</div>
+        <SidebarContent showBrand showVersion />
       </aside>
 
       <div className="app-main">
@@ -266,16 +265,8 @@ export function AppLayout() {
         id="appSidebar"
         aria-labelledby="appSidebarLabel"
       >
-        <div className="offcanvas-header">
-          <span
-            className="offcanvas-title d-flex align-items-center gap-2"
-            id="appSidebarLabel"
-          >
-            <span className="sidebar-logo sidebar-logo-sm">
-              <Icon name="scissors" size={14} />
-            </span>
-            NotaFácil
-          </span>
+        <div className="offcanvas-header app-sidebar-panel-header">
+          <SidebarBrand />
           <button
             type="button"
             className="btn-close btn-close-white"
@@ -284,7 +275,7 @@ export function AppLayout() {
           />
         </div>
         <div className="offcanvas-body d-flex flex-column p-3">
-          <SidebarNav />
+          <SidebarContent showVersion />
         </div>
       </div>
     </div>

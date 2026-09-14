@@ -4,10 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { translateError } from '../utils/errors';
 
 export function LoginPage() {
-  const { login, isAuthenticated, tenant } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    tenant: tenant?.slug ?? '',
     email: '',
     password: '',
   });
@@ -27,7 +26,7 @@ export function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(form);
+      await login({ email: form.email, password: form.password });
       navigate('/', { replace: true });
     } catch (err) {
       setError(translateError(err));
@@ -43,17 +42,6 @@ export function LoginPage() {
         <p className="auth-subtitle">Entre na sua conta</p>
 
         <form onSubmit={handleSubmit}>
-          <label className="form-field">
-            <span>Empresa</span>
-            <input
-              name="tenant"
-              value={form.tenant}
-              onChange={handleChange}
-              placeholder="minha-empresa"
-              required
-            />
-          </label>
-
           <label className="form-field">
             <span>E-mail</span>
             <input

@@ -43,11 +43,12 @@ export function RegisterPage() {
         <h1 className="auth-title">NotaFácil</h1>
         <p className="auth-subtitle">Crie sua empresa e sua conta de administrador</p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <label className="form-field">
             <span>Nome da empresa</span>
             <input
               name="companyName"
+              autoComplete="off"
               value={form.companyName}
               onChange={handleChange}
               placeholder="Minha Empresa"
@@ -59,6 +60,7 @@ export function RegisterPage() {
             <span>Seu nome</span>
             <input
               name="name"
+              autoComplete="off"
               value={form.name}
               onChange={handleChange}
               placeholder="Nome completo"
@@ -71,6 +73,7 @@ export function RegisterPage() {
             <input
               name="email"
               type="email"
+              autoComplete="off"
               value={form.email}
               onChange={handleChange}
               placeholder="voce@empresa.com"
@@ -83,6 +86,7 @@ export function RegisterPage() {
             <input
               name="password"
               type="password"
+              autoComplete="new-password"
               value={form.password}
               onChange={handleChange}
               placeholder="••••••••"

@@ -2,66 +2,16 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { apiRequest } from '../services/api';
+import { fetchDashboardStats } from '../services/dashboard';
 import { Icon } from '../components/Icon';
-
-const STATS = [
-  {
-    icon: 'orders',
-    accent: 'blue',
-    label: 'Pedidos em aberto',
-    value: '24',
-    detail: '+4 esta semana',
-  },
-  {
-    icon: 'scissors',
-    accent: 'purple',
-    label: 'Ordens em produção',
-    value: '8',
-    detail: '3 em fase de corte',
-  },
-  {
-    icon: 'invoice',
-    accent: 'amber',
-    label: 'Notas emitidas no mês',
-    value: '132',
-    detail: '+8% vs. mês anterior',
-  },
-  {
-    icon: 'financial',
-    accent: 'green',
-    label: 'Faturamento no mês',
-    value: 'R$ 86.400',
-    detail: '+15% vs. mês anterior',
-  },
-];
-
-const RECENT_ORDERS = [
-  { id: '#2051', client: 'Loja Bella Moda', items: 240, total: 12800, date: '10/09/2026', status: 'Em produção' },
-  { id: '#2050', client: 'Executiva Sul', items: 180, total: 15300, date: '09/09/2026', status: 'Aguardando corte' },
-  { id: '#2049', client: 'Denim Store', items: 320, total: 22400, date: '08/09/2026', status: 'Faturado' },
-  { id: '#2048', client: 'Veste Bem', items: 150, total: 6750, date: '08/09/2026', status: 'Finalizado' },
-  { id: '#2047', client: 'Atacado Prime', items: 500, total: 31000, date: '05/09/2026', status: 'Em produção' },
-];
-
-const PRODUCTION = [
-  { id: 'OP-1042', product: 'Vestido midi floral', client: 'Bella Moda', stage: 'Costura', progress: 65 },
-  { id: 'OP-1043', product: 'Camisa social slim', client: 'Executiva Sul', stage: 'Corte', progress: 30 },
-  { id: 'OP-1044', product: 'Calça jeans feminina', client: 'Denim Store', stage: 'Acabamento', progress: 85 },
-  { id: 'OP-1045', product: 'Blusa malha canelada', client: 'Veste Bem', stage: 'Costura', progress: 50 },
-];
-
-const LOW_STOCK = [
-  { name: 'Tecido Oxford — Azul marinho', qty: '12 m' },
-  { name: 'Linha poliéster — Branca', qty: '3 cones' },
-  { name: 'Botão encapado 12mm', qty: '50 un' },
-  { name: 'Zíper invisível 60cm — Preto', qty: '18 un' },
-];
+import { translateError } from '../utils/errors';
 
 const STATUS_VARIANTS = {
-  'Em produção': 'blue',
-  'Aguardando corte': 'amber',
-  'Faturado': 'purple',
-  'Finalizado': 'green',
+  in_production: 'blue',
+  awaiting_cutting: 'amber',
+  invoiced: 'purple',
+  finished: 'green',
+  cancelled: 'slate',
 };
 
 const currency = new Intl.NumberFormat('pt-BR', {
@@ -73,12 +23,27 @@ const currency = new Intl.NumberFormat('pt-BR', {
 export function DashboardPage() {
   const { tenant, token } = useAuth();
   const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [productionOrders, setProductionOrders] = useState([]);
+  const [lowStockSupplies, setLowStockSupplies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    apiRequest('/users', { token })
-      .then(setUsers)
-      .catch((err) => setError(err.message));
+    Promise.all([
+      apiRequest('/users', { token }).catch(() => []),
+      fetchDashboardStats(token),
+    ])
+      .then(([usersData, dashboardData]) => {
+        setUsers(usersData || []);
+        setStats(dashboardData.stats);
+        setRecentOrders(dashboardData.recentOrders);
+        setProductionOrders(dashboardData.productionOrders);
+        setLowStockSupplies(dashboardData.lowStockSupplies);
+      })
+      .catch((err) => setError(translateError(err)))
+      .finally(() => setLoading(false));
   }, [token]);
 
   return (
@@ -98,7 +63,7 @@ export function DashboardPage() {
       </div>
 
       <div className="row g-3 mb-4">
-        {STATS.map((stat) => (
+        {stats.map((stat) => (
           <div className="col-12 col-sm-6 col-xl-3" key={stat.label}>
             <div className="stat-card">
               <span className={`stat-icon stat-icon--${stat.accent}`}>
@@ -133,26 +98,40 @@ export function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {RECENT_ORDERS.map((order) => (
-                    <tr key={order.id}>
-                      <td>
-                        <strong>{order.id}</strong>
-                        <span className="dash-table-muted d-block">
-                          {order.date}
-                        </span>
-                      </td>
-                      <td>{order.client}</td>
-                      <td>{order.items}</td>
-                      <td>{currency.format(order.total)}</td>
-                      <td>
-                        <span
-                          className={`status-badge status-badge--${STATUS_VARIANTS[order.status] ?? 'slate'}`}
-                        >
-                          {order.status}
-                        </span>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="5" className="orders-empty">
+                        Carregando pedidos...
                       </td>
                     </tr>
-                  ))}
+                  ) : recentOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="orders-empty">
+                        Nenhum pedido encontrado.
+                      </td>
+                    </tr>
+                  ) : (
+                    recentOrders.map((order) => (
+                      <tr key={order.id}>
+                        <td>
+                          <strong>{order.id}</strong>
+                          <span className="dash-table-muted d-block">
+                            {order.date}
+                          </span>
+                        </td>
+                        <td>{order.client}</td>
+                        <td>{order.items}</td>
+                        <td>{currency.format(order.total)}</td>
+                        <td>
+                          <span
+                            className={`status-badge status-badge--${STATUS_VARIANTS[order.status] ?? 'slate'}`}
+                          >
+                            {order.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -195,27 +174,33 @@ export function DashboardPage() {
               <Link to="/producao">Ver todas</Link>
             </div>
             <div>
-              {PRODUCTION.map((item) => (
-                <div className="production-item" key={item.id}>
-                  <div className="production-item-head">
-                    <span className="production-item-name">{item.product}</span>
-                    <span className="production-item-stage">{item.stage}</span>
+              {loading ? (
+                <div className="text-center p-3">Carregando...</div>
+              ) : productionOrders.length === 0 ? (
+                <div className="text-center p-3">Nenhuma ordem em produção.</div>
+              ) : (
+                productionOrders.map((item) => (
+                  <div className="production-item" key={item.id}>
+                    <div className="production-item-head">
+                      <span className="production-item-name">{item.product}</span>
+                      <span className="production-item-stage">{item.stage}</span>
+                    </div>
+                    <div className="production-item-meta">
+                      {item.id} · {item.client}
+                    </div>
+                    <div className="progress">
+                      <div
+                        className="progress-bar"
+                        role="progressbar"
+                        style={{ width: `${item.progress}%` }}
+                        aria-valuenow={item.progress}
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      />
+                    </div>
                   </div>
-                  <div className="production-item-meta">
-                    {item.id} · {item.client}
-                  </div>
-                  <div className="progress">
-                    <div
-                      className="progress-bar"
-                      role="progressbar"
-                      style={{ width: `${item.progress}%` }}
-                      aria-valuenow={item.progress}
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    />
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -225,12 +210,18 @@ export function DashboardPage() {
               <Link to="/insumos">Ver insumos</Link>
             </div>
             <div>
-              {LOW_STOCK.map((item) => (
-                <div className="stock-item" key={item.name}>
-                  <span className="stock-item-name">{item.name}</span>
-                  <span className="stock-item-qty">{item.qty}</span>
-                </div>
-              ))}
+              {loading ? (
+                <div className="text-center p-3">Carregando...</div>
+              ) : lowStockSupplies.length === 0 ? (
+                <div className="text-center p-3">Todos os insumos com estoque normal.</div>
+              ) : (
+                lowStockSupplies.map((item) => (
+                  <div className="stock-item" key={item.name}>
+                    <span className="stock-item-name">{item.name}</span>
+                    <span className="stock-item-qty">{item.qty}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

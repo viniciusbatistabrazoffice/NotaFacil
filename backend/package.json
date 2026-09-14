@@ -8,10 +8,12 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typeorm": "typeorm-ts-node-commonjs",
+    "seed:orders": "ts-node src/database/seed-orders.ts",
+    "seed:products": "ts-node src/database/seed-products.ts",
     "migration:generate": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
     "migration:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test -r ts-node/register/transpile-only src/tests/*.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +35,8 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.20.2",
+    "@types/sinon": "^22.0.0",
+    "sinon": "^22.1.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"

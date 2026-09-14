@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from 'react';
 import { apiRequest } from '../services/api';
 
 const STORAGE_KEY = 'notafacil.auth';
+const LAST_TENANT_KEY = 'notafacil.lastTenant';
 
 const AuthContext = createContext(null);
 
@@ -28,9 +29,16 @@ export function AuthProvider({ children }) {
   const login = async ({ tenant, email, password }) => {
     const data = await apiRequest('/auth/login', {
       method: 'POST',
-      body: { tenant, email, password },
+      body: { email, password, ...(tenant ? { tenant } : {}) },
     });
+    if (data?.requiresTenantSelection) {
+      const lastTenant = localStorage.getItem(LAST_TENANT_KEY);
+      const chosen =
+        data.tenants.find((t) => t.slug === lastTenant) ?? data.tenants[0];
+      return login({ email, password, tenant: chosen?.slug });
+    }
     persist({ token: data.token, user: data.user, tenant: data.tenant });
+    localStorage.setItem(LAST_TENANT_KEY, data.tenant.slug);
     return data;
   };
 

@@ -6,6 +6,10 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Garante que PDV e Checkout sempre iniciem em dark mode
+localStorage.setItem('pdv-dark-mode', JSON.stringify(true));
+localStorage.setItem('checkout-dark-mode', JSON.stringify(true));
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

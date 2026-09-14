@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { apiRequest } from '../services/api';
+import { fetchMockOrderById } from '../services/mockOrders';
 import { translateError } from '../utils/errors';
 import {
   formatCurrency,
@@ -13,7 +12,6 @@ import {
 
 export function OrderDetailsPage() {
   const { id } = useParams();
-  const { token } = useAuth();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -22,11 +20,11 @@ export function OrderDetailsPage() {
     setLoading(true);
     setError('');
 
-    apiRequest(`/orders/${id}`, { token })
+    fetchMockOrderById(id)
       .then(setOrder)
       .catch((err) => setError(translateError(err)))
       .finally(() => setLoading(false));
-  }, [token, id]);
+  }, [id]);
 
   return (
     <div className="dashboard-content">

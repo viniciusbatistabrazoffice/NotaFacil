@@ -4,7 +4,7 @@ import { apiRequest } from '../services/api';
 import { translateError } from '../utils/errors';
 
 export function ForgotPasswordPage() {
-  const [form, setForm] = useState({ tenant: '', email: '' });
+  const [form, setForm] = useState({ email: '' });
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export function ForgotPasswordPage() {
     try {
       const data = await apiRequest('/auth/forgot-password', {
         method: 'POST',
-        body: { tenant: form.tenant, email: form.email },
+        body: { email: form.email },
       });
       setResult(data);
     } catch (err) {
@@ -49,17 +49,6 @@ export function ForgotPasswordPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <label className="form-field">
-              <span>Empresa</span>
-              <input
-                name="tenant"
-                value={form.tenant}
-                onChange={handleChange}
-                placeholder="minha-empresa"
-                required
-              />
-            </label>
-
             <label className="form-field">
               <span>E-mail</span>
               <input
