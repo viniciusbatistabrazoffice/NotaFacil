@@ -1,6 +1,7 @@
-import { useState } from 'react';
+ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { SaleReceiptModal } from '../components/SaleReceiptModal';
 import { useCheckout } from '../contexts/CheckoutContext';
 import { useAuth } from '../contexts/AuthContext';
 import { apiRequest } from '../services/api';
@@ -19,6 +20,7 @@ export function CheckoutSummaryPage() {
   const { cart, paymentMethod, paymentDetails, clearCart } = useCheckout();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [completedSale, setCompletedSale] = useState(null);
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -50,28 +52,49 @@ export function CheckoutSummaryPage() {
       const payload = {
         items: cart.map((item) => ({
           productId: item.id,
+          productName: item.name,
+          unitPrice: item.price,
           quantity: item.quantity,
-          price: item.price,
         })),
-        paymentMethod,
-        paymentDetails,
-        total,
       };
 
-      await apiRequest('/orders', {
+      const saleData = await apiRequest('/sales', {
         method: 'POST',
         body: payload,
         token,
       });
 
-      clearCart();
-      navigate('/caixa', { replace: true });
+      setCompletedSale({
+        ...saleData,
+        items: saleData.items || cart.map((item) => ({
+          productName: item.name,
+          unitPrice: item.price,
+          quantity: item.quantity,
+        })),
+      });
     } catch (err) {
       setError(translateError(err));
     } finally {
       setSaving(false);
     }
   };
+
+  const handleCloseReceipt = () => {
+    clearCart();
+    navigate('/caixa', { replace: true });
+  };
+
+  if (completedSale) {
+    return (
+      <SaleReceiptModal
+        sale={completedSale}
+        paymentMethod={paymentMethod}
+        paymentDetails={paymentDetails}
+        onClose={handleCloseReceipt}
+        onNewSale={handleCloseReceipt}
+      />
+    );
+  }
 
   return (
     <>

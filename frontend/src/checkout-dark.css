@@ -303,6 +303,11 @@
   border-color: rgba(220, 38, 38, 0.3);
 }
 
+.checkout-page-wrapper.dark .form-error {
+  background: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+}
+
 /* Dark Payment Methods */
 .checkout-page-wrapper.dark .payment-container {
   background: #1a1a1a;
@@ -375,9 +380,52 @@
   border-top-color: rgba(134, 239, 172, 0.3);
 }
 
+/* Dark Summary Section */
+.checkout-page-wrapper.dark .summary-section {
+  background: #1a1a1a;
+  border-color: #333333;
+}
+
+.checkout-page-wrapper.dark .summary-section h2 {
+  color: #ffffff;
+}
+
+.checkout-page-wrapper.dark .summary-product-row {
+  background: #252525;
+  border-color: #333333;
+}
+
+.checkout-page-wrapper.dark .product-info h4 {
+  color: #ffffff;
+}
+
+.checkout-page-wrapper.dark .product-code {
+  color: #6b7280;
+}
+
+.checkout-page-wrapper.dark .product-total strong {
+  color: #4a90e2;
+}
+
 /* Dark Payment Summary */
 .checkout-page-wrapper.dark .payment-summary {
   background: #1a1a1a;
+}
+
+.checkout-page-wrapper.dark .payment-method-display,
+.checkout-page-wrapper.dark .payment-details-display {
+  background: #252525;
+  border-color: #333333;
+}
+
+.checkout-page-wrapper.dark .payment-method-display .label,
+.checkout-page-wrapper.dark .payment-details-display .label {
+  color: #a8b5d1;
+}
+
+.checkout-page-wrapper.dark .payment-method-display strong,
+.checkout-page-wrapper.dark .payment-details-display strong {
+  color: #ffffff;
 }
 
 .checkout-page-wrapper.dark .summary-items::-webkit-scrollbar-thumb {
@@ -402,6 +450,24 @@
 
 .checkout-page-wrapper.dark .summary-divider {
   background: #333333;
+}
+
+/* Dark Summary Totals */
+.checkout-page-wrapper.dark .summary-totals {
+  background: transparent;
+}
+
+.checkout-page-wrapper.dark .total-row {
+  color: #9ca3af;
+}
+
+.checkout-page-wrapper.dark .total-row.total-final {
+  color: #ffffff;
+  border-top-color: #333333;
+}
+
+.checkout-page-wrapper.dark .total-row.total-final strong {
+  color: #4a90e2;
 }
 
 .checkout-page-wrapper.dark .summary-total-row {

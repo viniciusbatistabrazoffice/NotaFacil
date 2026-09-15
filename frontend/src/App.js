@@ -34,6 +34,9 @@ import { SettingsPage } from './pages/SettingsPage';
 import './App.css';
 import './checkout.css';
 import './checkout-dark.css';
+import './pdv.css';
+import './pdv-summary.css';
+import './receipt.css';
 
 function App() {
   return (

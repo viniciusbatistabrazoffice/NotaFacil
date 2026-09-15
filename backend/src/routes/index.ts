@@ -11,22 +11,31 @@ import { productionRoutes } from './production.routes';
 import { invoiceRoutes } from './invoice.routes';
 import { cashRoutes } from './cash.routes';
 import { saleRoutes } from './sale.routes';
+import { createPaymentRoutes } from './payment.routes';
+import { DataSource } from 'typeorm';
+
+export const createRoutes = (dataSource: DataSource) => {
+  const routes = Router();
+
+  routes.get('/health', (_req, res) => {
+    res.json({ status: 'ok' });
+  });
+
+  routes.use('/auth', authRoutes);
+  routes.use('/users', userRoutes);
+  routes.use('/orders', orderRoutes);
+  routes.use('/financial', financialRoutes);
+  routes.use('/suppliers', supplierRoutes);
+  routes.use('/supplies', supplyRoutes);
+  routes.use('/products', productRoutes);
+  routes.use('/clients', clientRoutes);
+  routes.use('/productions', productionRoutes);
+  routes.use('/invoices', invoiceRoutes);
+  routes.use('/caixa', cashRoutes);
+  routes.use('/sales', saleRoutes);
+  routes.use('/payments', createPaymentRoutes(dataSource));
+
+  return routes;
+};
 
 export const routes = Router();
-
-routes.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
-});
-
-routes.use('/auth', authRoutes);
-routes.use('/users', userRoutes);
-routes.use('/orders', orderRoutes);
-routes.use('/financial', financialRoutes);
-routes.use('/suppliers', supplierRoutes);
-routes.use('/supplies', supplyRoutes);
-routes.use('/products', productRoutes);
-routes.use('/clients', clientRoutes);
-routes.use('/productions', productionRoutes);
-routes.use('/invoices', invoiceRoutes);
-routes.use('/caixa', cashRoutes);
-routes.use('/sales', saleRoutes);

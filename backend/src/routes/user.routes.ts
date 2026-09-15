@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
+import { asyncHandler } from '../utils/async-handler';
 
 const userController = new UserController();
 
@@ -8,8 +9,8 @@ export const userRoutes = Router();
 
 userRoutes.use(authMiddleware);
 
-userRoutes.get('/', userController.findAll);
-userRoutes.get('/:id', userController.findById);
-userRoutes.post('/', userController.create);
-userRoutes.put('/:id', userController.update);
-userRoutes.delete('/:id', userController.delete);
+userRoutes.get('/', asyncHandler((req, res) => userController.findAll(req, res)));
+userRoutes.get('/:id', asyncHandler((req, res) => userController.findById(req, res)));
+userRoutes.post('/', asyncHandler((req, res) => userController.create(req, res)));
+userRoutes.put('/:id', asyncHandler((req, res) => userController.update(req, res)));
+userRoutes.delete('/:id', asyncHandler((req, res) => userController.delete(req, res)));

@@ -110,7 +110,7 @@ export class SaleService {
     const repository = await getSaleRepository(schemaName);
     const sale = await repository.findOne({
       where: { id },
-      relations: ['items', 'createdBy', 'client'],
+      relations: { items: true, createdBy: true, client: true },
     });
 
     if (!sale) {
