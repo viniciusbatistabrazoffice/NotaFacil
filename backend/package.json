@@ -10,6 +10,7 @@
     "typeorm": "typeorm-ts-node-commonjs",
     "seed:orders": "ts-node src/database/seed-orders.ts",
     "seed:products": "ts-node src/database/seed-products.ts",
+    "seed:productions": "ts-node src/database/seed-productions.ts",
     "migration:generate": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
     "migration:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
